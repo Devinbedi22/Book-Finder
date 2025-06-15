@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📚 Book Tracker App</title>
+
+   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+   
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
+
+   
+  <link rel="stylesheet" href="stylee1.css">
+</head>
+<body>
+
+ 
+  <div id="message-bar"></div>
+
+  
+  <nav class="main-nav">
+    <div class="nav-logo">📚 BookTracker</div>
+    <ul class="nav-menu">
+      <li><a id="nav-home" class="active" href="#">Home</a></li>
+      <li><a id="nav-list" href="#">My List</a></li>
+      <li><a id="nav-search-api" href="#">Search API</a></li>
+      <li><a id="nav-login" href="#">Login</a></li>
+      <li><a id="nav-signup" href="#">Signup</a></li>
+      <li><a id="logoutBtn" style="display:none;" href="#">Logout</a></li>
+    </ul>
+    <div class="nav-hamburger" onclick="toggleNav()">☰</div>
+  </nav>
+
+ 
+
+   
+  <section id="home-section">
+    <h2>Welcome to Book Tracker</h2>
+    <p>Track your reading journey. Search books, save favorites, and never lose your list!</p>
+  </section>
+
+  
+  <section id="list-section" style="display:none;">
+    <h2>Your Books</h2>
+    <ul id="book-list" class="fa-ul book-cards"></ul>
+  </section>
+ 
+  <section id="search-section" style="display:none;">
+    <h2>Search Books</h2>
+    <div class="search-box">
+      <input type="text" id="search-query" placeholder="Enter title or author">
+      <button id="search-button"><i class="fa fa-search"></i> Search</button>
+    </div>
+    <div class="search-box">
+      <label for="filter-type">Filter:</label>
+      <select id="filter-type">
+        <option value="">All</option>
+        <option value="ebooks">Ebooks</option>
+        <option value="free-ebooks">Free Ebooks</option>
+        <option value="full">Full View</option>
+        <option value="partial">Partial View</option>
+      </select>
+
+      <label for="print-type">Print Type:</label>
+      <select id="print-type">
+        <option value="">All</option>
+        <option value="books">Books</option>
+        <option value="magazines">Magazines</option>
+      </select>
+
+      <label for="order-by">Sort By:</label>
+      <select id="order-by">
+        <option value="">Relevance</option>
+        <option value="newest">Newest</option>
+      </select>
+    </div>
+    <div id="search-results" class="book-cards"></div>
+  </section>
+ 
+  <section id="login-section" style="display:none;">
+    <h2>Login</h2>
+    <input type="email" id="login-email" placeholder="Email" autocomplete="email"><br><br>
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password"><br><br>
+    <button id="loginBtn">Login</button>
+  </section>
+
+ 
+  <section id="signup-section" style="display:none;">
+    <h2>Signup</h2>
+    <input type="text" id="signup-username" placeholder="Username" autocomplete="username"><br><br>
+    <input type="email" id="signup-email" placeholder="Email" autocomplete="email"><br><br>
+    <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password"><br><br>
+    <button id="signupBtn">Signup</button>
+  </section>
+
+   
+  <h2 style="text-align:center; margin-top:30px;">Trending Books</h2>
+  <div id="book-carousel" class="splide" style="max-width:800px; margin:auto;">
+    <div class="splide__track">
+      <ul class="splide__list" id="carousel-list"></ul>
+    </div>
+  </div>
+
+   
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
+  <script src="app1.js"></script>
+</body>
+</html>
