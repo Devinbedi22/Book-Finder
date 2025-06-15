@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = window.location.origin;
 let token = localStorage.getItem('token');
 
  
