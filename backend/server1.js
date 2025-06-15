@@ -121,15 +121,15 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-const path = require('path');
+const frontendPath = path.join(__dirname, '..', 'frontend');
 
-// Serve static files from frontend folder (correct relative path)
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+app.use(express.static(frontendPath));
 
-// Serve index.html for all unknown routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+// Only serve index.html for unknown *GET* routes (not APIs)
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
+
 
 
 // ===== START SERVER =====
