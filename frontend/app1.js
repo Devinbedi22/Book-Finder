@@ -1,7 +1,6 @@
-const BASE_URL = window.location.origin;
+const BASE_URL = 'https://book-finder-xmxo.onrender.com';
 let token = localStorage.getItem('token');
 
- 
 function showMessage(msg, type = 'success') {
   const messageBar = document.getElementById('message-bar');
   if (!messageBar) return;
@@ -11,7 +10,6 @@ function showMessage(msg, type = 'success') {
   setTimeout(() => (messageBar.style.opacity = 0), 3000);
 }
 
- 
 const sections = {
   home: document.getElementById('home-section'),
   list: document.getElementById('list-section'),
@@ -46,7 +44,7 @@ Object.entries(navMap).forEach(([navId, sec]) => {
   const btn = document.getElementById(navId);
   if (btn) {
     btn.onclick = () => {
-      const needsLogin = (sec === 'list' || sec === 'search');
+      const needsLogin = sec === 'list' || sec === 'search';
       if (needsLogin && !token) {
         showMessage('Please login first!', 'error');
         return;
@@ -57,12 +55,14 @@ Object.entries(navMap).forEach(([navId, sec]) => {
   }
 });
 
- 
 document.getElementById('signupBtn').onclick = async () => {
   const username = document.getElementById('signup-username').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value;
-  if (!username || !email || !password) return showMessage('Fill all fields!', 'error');
+
+  if (!username || !email || !password) {
+    return showMessage('Fill all fields!', 'error');
+  }
 
   try {
     const res = await fetch(`${BASE_URL}/api/users/register`, {
@@ -70,6 +70,7 @@ document.getElementById('signupBtn').onclick = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password }),
     });
+
     const data = await res.json();
     if (res.ok) {
       showMessage(data.message || 'Signup successful!');
@@ -82,16 +83,18 @@ document.getElementById('signupBtn').onclick = async () => {
     showMessage('Signup failed', 'error');
   }
 };
- 
+
 document.getElementById('signup-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('signupBtn').click();
 });
 
- 
 document.getElementById('loginBtn').onclick = async () => {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
-  if (!email || !password) return showMessage('Enter email & password!', 'error');
+
+  if (!email || !password) {
+    return showMessage('Enter email & password!', 'error');
+  }
 
   try {
     const res = await fetch(`${BASE_URL}/api/users/login`, {
@@ -99,6 +102,7 @@ document.getElementById('loginBtn').onclick = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
+
     const data = await res.json();
     if (res.ok) {
       token = data.token;
@@ -116,12 +120,10 @@ document.getElementById('loginBtn').onclick = async () => {
   }
 };
 
- 
 document.getElementById('login-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('loginBtn').click();
 });
 
- 
 document.getElementById('logoutBtn').onclick = () => {
   token = null;
   localStorage.removeItem('token');
@@ -130,14 +132,24 @@ document.getElementById('logoutBtn').onclick = () => {
   showSection('login');
 };
 
- 
 async function fetchBooks() {
   if (!token) return;
+
   try {
     const res = await fetch(`${BASE_URL}/api/books`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error('Unauthorized or error fetching books');
+
+    if (res.status === 401) {
+      token = null;
+      localStorage.removeItem('token');
+      updateNavbar();
+      showMessage('Session expired. Please login again.', 'error');
+      showSection('login');
+      return;
+    }
+
+    if (!res.ok) throw new Error('Error fetching books');
     const books = await res.json();
     const ul = document.getElementById('book-list');
     ul.innerHTML = '';
@@ -168,12 +180,13 @@ async function fetchBooks() {
     showMessage('Failed to load books', 'error');
   }
 }
- 
+
 document.getElementById('book-list').addEventListener('click', async (e) => {
   const btn = e.target.closest('button');
   if (!btn) return;
 
   const id = btn.dataset.id;
+
   if (btn.classList.contains('modern-delete-btn')) {
     const wrapper = btn.closest('.delete-wrapper');
     wrapper.innerHTML = `
@@ -187,22 +200,32 @@ document.getElementById('book-list').addEventListener('click', async (e) => {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.status === 401) {
+        token = null;
+        localStorage.removeItem('token');
+        updateNavbar();
+        showMessage('Session expired. Please login again.', 'error');
+        showSection('login');
+        return;
+      }
+
+      const data = await res.json();
       if (res.ok) {
         showMessage('Book deleted');
         fetchBooks();
       } else {
-        const data = await res.json();
-        showMessage(data.error || 'Delete failed', 'error');
+        showMessage(data.message || 'Delete failed', 'error');
       }
     } catch (e) {
       console.error(e);
       showMessage('Error deleting book', 'error');
     }
   } else if (btn.classList.contains('confirm-no')) {
-    fetchBooks(); 
+    fetchBooks();
   }
 });
- 
+
 document.getElementById('search-button').onclick = async () => {
   const q = document.getElementById('search-query').value.trim();
   const filter = document.getElementById('filter-type')?.value || '';
@@ -263,7 +286,7 @@ document.getElementById('search-button').onclick = async () => {
     showMessage('Search failed', 'error');
   }
 };
- 
+
 function initCarousel() {
   new Splide('#book-carousel', {
     perPage: 4,
@@ -304,9 +327,11 @@ async function loadTrending() {
     });
   } catch (e) {
     console.error('Trending load error', e);
+    const list = document.getElementById('carousel-list');
+    list.innerHTML = '<p>Could not load trending books.</p>';
   }
 }
- 
+
 function updateNavbar() {
   const isLoggedIn = !!localStorage.getItem('token');
   document.getElementById('nav-login').style.display = isLoggedIn ? 'none' : 'inline-block';
