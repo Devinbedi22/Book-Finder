@@ -7,23 +7,25 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
- 
+// ===== MIDDLEWARE =====
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
- 
-mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+// ===== MONGODB CONNECTION =====
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('✅ MongoDB connected'))
+.catch(err => console.error('❌ MongoDB connection error:', err));
 
- 
+// ===== MODELS & ROUTES =====
 const Book = require('./book');
 const authRoutes = require('./auth');
 app.use('/api/users', authRoutes);
 
- 
+// ===== AUTH MIDDLEWARE =====
 const auth = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'No token provided' });
@@ -36,9 +38,10 @@ const auth = (req, res, next) => {
     res.status(401).json({ error: 'Invalid token' });
   }
 };
- 
 
- 
+// ===== BOOK ROUTES =====
+
+// Add a book
 app.post('/api/books', auth, async (req, res) => {
   const { title, authors } = req.body;
   if (!title || !Array.isArray(authors) || authors.length === 0) {
@@ -54,7 +57,7 @@ app.post('/api/books', auth, async (req, res) => {
   }
 });
 
- 
+// Get user's books (with optional author filter)
 app.get('/api/books', auth, async (req, res) => {
   const filter = { user: req.userId };
 
@@ -70,7 +73,7 @@ app.get('/api/books', auth, async (req, res) => {
   }
 });
 
- 
+// Delete a book
 app.delete('/api/books/:id', auth, async (req, res) => {
   try {
     const deleted = await Book.findOneAndDelete({ _id: req.params.id, user: req.userId });
@@ -81,7 +84,8 @@ app.delete('/api/books/:id', auth, async (req, res) => {
     res.status(500).json({ error: 'Failed to delete book' });
   }
 });
- 
+
+// ===== GOOGLE BOOKS SEARCH API =====
 app.get('/api/search', async (req, res) => {
   const { q, filter, printType, orderBy, langRestrict } = req.query;
 
@@ -117,6 +121,8 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
- 
+// ===== START SERVER =====
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
