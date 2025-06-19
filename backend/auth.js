@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     lowercase: true,
+    trim: true,
     match: [/.+@.+\..+/, 'Invalid email format']
   },
   password: {
@@ -38,20 +39,26 @@ router.post('/register', async (req, res) => {
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }
 
-    const existing = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existing) {
-      return res.status(409).json({ message: 'User already exists with this email' });
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existingUser) {
+      return res.status(409).json({ message: 'A user with this email already exists' });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
-    await new User({ username: username.trim(), email: email.toLowerCase().trim(), password: hashed }).save();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      username: username.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashedPassword
+    });
 
-    res.status(201).json({ message: 'User created successfully' });
+    await newUser.save();
+    res.status(201).json({ message: 'User registered successfully' });
+
   } catch (err) {
-    console.error('Signup error:', err.message);
+    console.error('❌ Signup error:', err.message);
     res.status(500).json({ message: 'Server error during registration' });
   }
 });
@@ -61,15 +68,27 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email: email?.toLowerCase().trim() });
-    if (!user || !await bcrypt.compare(password, user.password)) {
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn });
+
     res.json({ token });
+
   } catch (err) {
-    console.error('Login error:', err.message);
+    console.error('❌ Login error:', err.message);
     res.status(500).json({ message: 'Server error during login' });
   }
 });
