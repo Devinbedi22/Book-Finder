@@ -1,7 +1,6 @@
 const BASE_URL = 'https://book-finder-xmxo.onrender.com';
 let token = localStorage.getItem('token');
 
-// Show alert messages
 function showMessage(msg, type = 'success') {
   let messageBar = document.getElementById('message-bar');
   if (!messageBar) {
@@ -11,18 +10,13 @@ function showMessage(msg, type = 'success') {
   }
   messageBar.textContent = msg;
   messageBar.className = `message-bar ${type}`;
-  messageBar.style.display = 'block';
   messageBar.style.opacity = 1;
   clearTimeout(messageBar._fadeTimer);
   messageBar._fadeTimer = setTimeout(() => {
     messageBar.style.opacity = 0;
-    setTimeout(() => {
-      messageBar.style.display = 'none';
-    }, 400);
   }, 3000);
 }
 
-// Navigation and Section Handling
 const sections = {
   home: document.getElementById('home-section'),
   list: document.getElementById('list-section'),
@@ -68,7 +62,6 @@ Object.entries(navMap).forEach(([navId, sec]) => {
   }
 });
 
-// Signup Handler
 document.getElementById('signupBtn').onclick = async () => {
   const username = document.getElementById('signup-username').value.trim();
   const email = document.getElementById('signup-email').value.trim();
@@ -77,6 +70,7 @@ document.getElementById('signupBtn').onclick = async () => {
   if (!username || !email || !password) {
     return showMessage('Fill all fields!', 'error');
   }
+
   if (password.length < 6) {
     return showMessage('Password must be at least 6 characters', 'error');
   }
@@ -87,6 +81,7 @@ document.getElementById('signupBtn').onclick = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password }),
     });
+
     const data = await res.json();
     if (res.ok) {
       showMessage(data.message || 'Signup successful!');
@@ -96,7 +91,7 @@ document.getElementById('signupBtn').onclick = async () => {
     }
   } catch (e) {
     console.error(e);
-    showMessage('Signup error', 'error');
+    showMessage('Signup failed', 'error');
   }
 };
 
@@ -104,7 +99,6 @@ document.getElementById('signup-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('signupBtn').click();
 });
 
-// Login Handler
 document.getElementById('loginBtn').onclick = async () => {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
@@ -141,7 +135,6 @@ document.getElementById('login-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('loginBtn').click();
 });
 
-// Logout
 document.getElementById('logoutBtn').onclick = () => {
   token = null;
   localStorage.removeItem('token');
@@ -150,7 +143,6 @@ document.getElementById('logoutBtn').onclick = () => {
   showSection('login');
 };
 
-// Fetch Books (My List)
 async function fetchBooks() {
   if (!token) return;
 
@@ -173,11 +165,10 @@ async function fetchBooks() {
     ul.innerHTML = '';
 
     books.forEach((b) => {
-      if (!b._id) return;
+      if (!b.id) return;
       const authorName = Array.isArray(b.authors) && b.authors.length ? b.authors.join(', ') : 'Unknown author';
       const thumb = b.thumbnail || 'https://via.placeholder.com/128x195';
       const infoLink = b.infoLink || '#';
-
       const li = document.createElement('li');
       li.classList.add('book-item');
       li.innerHTML = `
@@ -188,7 +179,7 @@ async function fetchBooks() {
             <small>by ${authorName}</small>
           </div>
           <div class="delete-wrapper">
-            <button class="modern-delete-btn" data-id="${b._id}">
+            <button class="modern-delete-btn" data-id="${b.id}">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -201,7 +192,6 @@ async function fetchBooks() {
   }
 }
 
-// Delete Book
 document.getElementById('book-list').addEventListener('click', async (e) => {
   const btn = e.target.closest('button');
   if (!btn) return;
@@ -212,10 +202,9 @@ document.getElementById('book-list').addEventListener('click', async (e) => {
     const wrapper = btn.closest('.delete-wrapper');
     wrapper.innerHTML = `
       <span class="confirm-text">Confirm delete?</span>
-      <button class="confirm-btn confirm-yes" data-id="${id}">Yes</button>
-      <button class="confirm-btn confirm-no">No</button>
-    `;
-  } else if (btn.classList.contains('confirm-yes')) {
+      <button class="confirm-btn yes" data-id="${id}">Yes</button>
+      <button class="confirm-btn no">No</button>`;
+  } else if (btn.classList.contains('yes')) {
     try {
       const res = await fetch(`${BASE_URL}/api/books/${id}`, {
         method: 'DELETE',
@@ -232,12 +221,11 @@ document.getElementById('book-list').addEventListener('click', async (e) => {
       console.error(e);
       showMessage('Error deleting book', 'error');
     }
-  } else if (btn.classList.contains('confirm-no')) {
+  } else if (btn.classList.contains('no')) {
     fetchBooks();
   }
 });
 
-// Search API & Save Book
 document.getElementById('search-button').onclick = async () => {
   const q = document.getElementById('search-query').value.trim();
   const filter = document.getElementById('filter-type')?.value || '';
@@ -303,7 +291,6 @@ document.getElementById('search-button').onclick = async () => {
   }
 };
 
-// Trending Books
 function initCarousel() {
   new Splide('#book-carousel', {
     perPage: 4,
@@ -355,7 +342,6 @@ function updateNavbar() {
   document.getElementById('logoutBtn').style.display = isLoggedIn ? 'inline-block' : 'none';
 }
 
-// Init everything
 document.addEventListener('DOMContentLoaded', () => {
   initCarousel();
   updateNavbar();

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📚 Book Tracker App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,15 +17,16 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css" />
 
   <!-- Custom Styles -->
-  <!-- NOTE: make sure this filename matches your actual CSS file name -->
-  <link rel="stylesheet" href="style1.css" />
+  <link rel="stylesheet" href="stylee1.css" />
+
+   
 </head>
 <body>
-  <!-- ✅ Global Message Bar (dynamically shown/hidden by JS) -->
+  <!-- ✅ Global Message Bar -->
   <div id="message-bar"></div>
 
   <!-- ✅ Navigation Bar -->
-  <nav class="main-nav" aria-label="primary navigation">
+  <nav class="main-nav">
     <div class="nav-logo">📚 BookTracker</div>
     <ul class="nav-menu">
       <li><a id="nav-home" class="active" href="#">Home</a></li>
@@ -35,22 +36,19 @@
       <li><a id="nav-signup" href="#">Signup</a></li>
       <li><a id="logoutBtn" style="display:none;" href="#">Logout</a></li>
     </ul>
-    <!-- Accessible hamburger button -->
-    <button class="nav-hamburger" aria-label="Toggle navigation" onclick="toggleNav()">
-      <i class="fas fa-bars"></i>
-    </button>
+    <div class="nav-hamburger" onclick="toggleNav()">☰</div>
   </nav>
 
   <!-- ✅ Home Section -->
   <section id="home-section">
     <h2>Welcome to Book Tracker</h2>
-    <p>Track your reading journey. Search books, save favourites, and never lose your list!</p>
+    <p>Track your reading journey. Search books, save favorites, and never lose your list!</p>
   </section>
 
   <!-- ✅ Book List Section -->
   <section id="list-section" style="display:none;">
     <h2>Your Books</h2>
-    <ul id="book-list" class="fa-ul"></ul>
+    <ul id="book-list" class="fa-ul book-cards"></ul>
   </section>
 
   <!-- ✅ Book Search Section -->
@@ -58,7 +56,7 @@
     <h2>Search Books</h2>
     <div class="search-box">
       <input type="text" id="search-query" placeholder="Enter title or author" />
-      <button id="search-button" aria-label="Search for books"><i class="fa fa-search"></i> Search</button>
+      <button id="search-button"><i class="fa fa-search"></i> Search</button>
     </div>
     <div class="search-box">
       <label for="filter-type">Filter:</label>
@@ -83,23 +81,23 @@
         <option value="newest">Newest</option>
       </select>
     </div>
-    <div id="search-results"></div>
+    <div id="search-results" class="book-cards"></div>
   </section>
 
   <!-- ✅ Login Section -->
   <section id="login-section" style="display:none;">
     <h2>Login</h2>
-    <input type="email" id="login-email" placeholder="Email" autocomplete="email" /><br /><br />
-    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" /><br /><br />
+    <input type="email" id="login-email" placeholder="Email" autocomplete="email" /><br><br>
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" /><br><br>
     <button id="loginBtn">Login</button>
   </section>
 
   <!-- ✅ Signup Section -->
   <section id="signup-section" style="display:none;">
     <h2>Signup</h2>
-    <input type="text" id="signup-username" placeholder="Username" autocomplete="username" /><br /><br />
-    <input type="email" id="signup-email" placeholder="Email" autocomplete="email" /><br /><br />
-    <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password" /><br /><br />
+    <input type="text" id="signup-username" placeholder="Username" autocomplete="username" /><br><br>
+    <input type="email" id="signup-email" placeholder="Email" autocomplete="email" /><br><br>
+    <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password" /><br><br>
     <button id="signupBtn">Signup</button>
   </section>
 
@@ -111,8 +109,8 @@
     </div>
   </div>
 
-  <!-- ✅ Scripts (Splide + App) -->
+  <!-- ✅ Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
-  <script src="app1.js" defer></script>
+  <script src="app1.js"></script>
 </body>
 </html>
