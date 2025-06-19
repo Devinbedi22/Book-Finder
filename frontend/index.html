@@ -3,28 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <title>📚 Book Tracker App</title>
-
-   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-   
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-   
+  <!-- SplideJS Carousel -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
 
-   
+  <!-- Custom Styles -->
   <link rel="stylesheet" href="stylee1.css">
+
+  <!-- Optional: Inline fallback styles for the message bar -->
+  <style>
+    #message-bar {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4caf50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 9999;
+    }
+    #message-bar.error {
+      background: #e74c3c;
+    }
+  </style>
 </head>
 <body>
 
- 
+  <!-- ✅ Global Message Bar -->
   <div id="message-bar"></div>
 
-  
+  <!-- ✅ Navigation Bar -->
   <nav class="main-nav">
     <div class="nav-logo">📚 BookTracker</div>
     <ul class="nav-menu">
@@ -38,26 +59,27 @@
     <div class="nav-hamburger" onclick="toggleNav()">☰</div>
   </nav>
 
- 
-
-   
+  <!-- ✅ Home Section -->
   <section id="home-section">
     <h2>Welcome to Book Tracker</h2>
     <p>Track your reading journey. Search books, save favorites, and never lose your list!</p>
   </section>
 
-  
+  <!-- ✅ Book List Section -->
   <section id="list-section" style="display:none;">
     <h2>Your Books</h2>
     <ul id="book-list" class="fa-ul book-cards"></ul>
   </section>
- 
+
+  <!-- ✅ Book Search Section -->
   <section id="search-section" style="display:none;">
     <h2>Search Books</h2>
+
     <div class="search-box">
       <input type="text" id="search-query" placeholder="Enter title or author">
       <button id="search-button"><i class="fa fa-search"></i> Search</button>
     </div>
+
     <div class="search-box">
       <label for="filter-type">Filter:</label>
       <select id="filter-type">
@@ -81,9 +103,11 @@
         <option value="newest">Newest</option>
       </select>
     </div>
+
     <div id="search-results" class="book-cards"></div>
   </section>
- 
+
+  <!-- ✅ Login Section -->
   <section id="login-section" style="display:none;">
     <h2>Login</h2>
     <input type="email" id="login-email" placeholder="Email" autocomplete="email"><br><br>
@@ -91,7 +115,7 @@
     <button id="loginBtn">Login</button>
   </section>
 
- 
+  <!-- ✅ Signup Section -->
   <section id="signup-section" style="display:none;">
     <h2>Signup</h2>
     <input type="text" id="signup-username" placeholder="Username" autocomplete="username"><br><br>
@@ -100,7 +124,7 @@
     <button id="signupBtn">Signup</button>
   </section>
 
-   
+  <!-- ✅ Trending Carousel Section -->
   <h2 style="text-align:center; margin-top:30px;">Trending Books</h2>
   <div id="book-carousel" class="splide" style="max-width:800px; margin:auto;">
     <div class="splide__track">
@@ -108,7 +132,7 @@
     </div>
   </div>
 
-   
+  <!-- ✅ JS Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
   <script src="app1.js"></script>
 </body>

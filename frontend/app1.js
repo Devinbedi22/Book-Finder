@@ -2,8 +2,12 @@ const BASE_URL = 'https://book-finder-xmxo.onrender.com';
 let token = localStorage.getItem('token');
 
 function showMessage(msg, type = 'success') {
-  const messageBar = document.getElementById('message-bar');
-  if (!messageBar) return;
+  let messageBar = document.getElementById('message-bar');
+  if (!messageBar) {
+    messageBar = document.createElement('div');
+    messageBar.id = 'message-bar';
+    document.body.appendChild(messageBar);
+  }
   messageBar.textContent = msg;
   messageBar.className = `message-bar ${type}`;
   messageBar.style.opacity = 1;
@@ -76,6 +80,7 @@ document.getElementById('signupBtn').onclick = async () => {
       showMessage(data.message || 'Signup successful!');
       showSection('login');
     } else {
+      console.error(data);
       showMessage(data.message || 'Signup failed', 'error');
     }
   } catch (e) {
@@ -112,7 +117,8 @@ document.getElementById('loginBtn').onclick = async () => {
       showSection('home');
       fetchBooks();
     } else {
-      showMessage(data.message || 'Login failed', 'error');
+      console.error(data);
+      showMessage(data.message || 'Invalid credentials', 'error');
     }
   } catch (e) {
     console.error(e);
@@ -195,12 +201,14 @@ document.getElementById('book-list').addEventListener('click', async (e) => {
       <button class="confirm-btn confirm-no">No</button>
     `;
   } else if (btn.classList.contains('confirm-yes')) {
+    if (!id) return showMessage("Book ID missing", "error");
     try {
       const res = await fetch(`${BASE_URL}/api/books/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      const data = await res.json();
       if (res.status === 401) {
         token = null;
         localStorage.removeItem('token');
@@ -210,7 +218,6 @@ document.getElementById('book-list').addEventListener('click', async (e) => {
         return;
       }
 
-      const data = await res.json();
       if (res.ok) {
         showMessage('Book deleted');
         fetchBooks();
