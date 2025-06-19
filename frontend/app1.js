@@ -11,7 +11,10 @@ function showMessage(msg, type = 'success') {
   messageBar.textContent = msg;
   messageBar.className = `message-bar ${type}`;
   messageBar.style.opacity = 1;
-  setTimeout(() => (messageBar.style.opacity = 0), 3000);
+  clearTimeout(messageBar._fadeTimer);
+  messageBar._fadeTimer = setTimeout(() => {
+    messageBar.style.opacity = 0;
+  }, 3000);
 }
 
 const sections = {
@@ -162,6 +165,7 @@ async function fetchBooks() {
     ul.innerHTML = '';
 
     books.forEach((b) => {
+      if (!b._id) return; // prevent rendering undefined books
       const authorName = Array.isArray(b.authors) && b.authors.length ? b.authors.join(', ') : 'Unknown author';
       const thumb = b.thumbnail || 'https://via.placeholder.com/128x195';
       const infoLink = b.infoLink || '#';

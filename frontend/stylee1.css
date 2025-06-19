@@ -305,3 +305,12 @@ ul.fa-ul li {
   text-decoration: underline;
   color: #007bff;
 }
+#message-bar {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateX(-50%) translateY(0);
+}
+
+#message-bar.show {
+  opacity: 1 !important;
+}
+
