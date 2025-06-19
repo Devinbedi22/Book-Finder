@@ -11,14 +11,15 @@ const app = express();
 // ===== MIDDLEWARE =====
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
-// ===== DATABASE CONNECTION =====
+// ===== MONGODB CONNECTION =====
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+.then(() => console.log('✅ MongoDB connected'))
+.catch(err => console.error('❌ MongoDB connection error:', err));
 
 // ===== MODELS & ROUTES =====
 const Book = require('./book');
@@ -28,22 +29,24 @@ app.use('/api/users', authRoutes);
 // ===== AUTH MIDDLEWARE =====
 const auth = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
+  if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.userId;
     next();
   } catch {
-    res.status(401).json({ message: 'Invalid token' });
+    res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 
-// ===== API: Add Book =====
+// ===== BOOK ROUTES =====
+
+// Add a book
 app.post('/api/books', auth, async (req, res) => {
   const { title, authors } = req.body;
   if (!title || !Array.isArray(authors) || authors.length === 0) {
-    return res.status(400).json({ message: 'Missing title or authors' });
+    return res.status(400).json({ message: 'Title and at least one author are required' });
   }
 
   try {
@@ -51,11 +54,12 @@ app.post('/api/books', auth, async (req, res) => {
     const saved = await book.save();
     res.status(201).json(saved);
   } catch (e) {
-    res.status(500).json({ message: e.message });
+    console.error('Add Book Error:', e.message);
+    res.status(500).json({ message: 'Failed to save book' });
   }
 });
 
-// ===== API: Get Books =====
+// Get user's books (with optional author filter)
 app.get('/api/books', auth, async (req, res) => {
   const filter = { user: req.userId };
   if (req.query.author) {
@@ -66,27 +70,29 @@ app.get('/api/books', auth, async (req, res) => {
     const books = await Book.find(filter).sort({ createdAt: -1 });
     res.json(books);
   } catch (e) {
+    console.error('Get Books Error:', e.message);
     res.status(500).json({ message: 'Failed to fetch books' });
   }
 });
 
-// ===== API: Delete Book =====
+// Delete a book
 app.delete('/api/books/:id', auth, async (req, res) => {
   try {
     const deleted = await Book.findOneAndDelete({ _id: req.params.id, user: req.userId });
     if (!deleted) {
       return res.status(404).json({ message: 'Book not found or not owned by user' });
     }
+
     res.json({ message: 'Book deleted' });
   } catch (e) {
+    console.error('Delete Book Error:', e.message);
     res.status(500).json({ message: 'Failed to delete book' });
   }
 });
 
-// ===== API: Search Google Books =====
+// ===== GOOGLE BOOKS SEARCH API =====
 app.get('/api/search', async (req, res) => {
   const { q, filter, printType, orderBy, langRestrict } = req.query;
-
   if (!q) return res.status(400).json({ message: 'Missing query parameter "q"' });
 
   try {
@@ -115,11 +121,11 @@ app.get('/api/search', async (req, res) => {
     res.json(books);
   } catch (err) {
     console.error('Google Books API error:', err.message);
-    res.status(500).json({ message: 'Failed to fetch books from Google Books' });
+    res.status(500).json({ message: 'Failed to fetch books from Google Books API' });
   }
 });
 
-// ===== FRONTEND ROUTE HANDLING =====
+// ===== FRONTEND ROUTING =====
 const frontendPath = path.join(__dirname, '..', 'frontend');
 app.use(express.static(frontendPath));
 

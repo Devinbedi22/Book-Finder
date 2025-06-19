@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>📚 Book Tracker App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
 
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- SplideJS Carousel -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="stylee1.css">
+  <link rel="stylesheet" href="stylee1.css" />
 
-  <!-- Optional: Inline fallback styles for the message bar -->
+  <!-- Inline Message Styles -->
   <style>
     #message-bar {
       position: fixed;
@@ -41,7 +41,6 @@
   </style>
 </head>
 <body>
-
   <!-- ✅ Global Message Bar -->
   <div id="message-bar"></div>
 
@@ -74,12 +73,10 @@
   <!-- ✅ Book Search Section -->
   <section id="search-section" style="display:none;">
     <h2>Search Books</h2>
-
     <div class="search-box">
-      <input type="text" id="search-query" placeholder="Enter title or author">
+      <input type="text" id="search-query" placeholder="Enter title or author" />
       <button id="search-button"><i class="fa fa-search"></i> Search</button>
     </div>
-
     <div class="search-box">
       <label for="filter-type">Filter:</label>
       <select id="filter-type">
@@ -103,24 +100,23 @@
         <option value="newest">Newest</option>
       </select>
     </div>
-
     <div id="search-results" class="book-cards"></div>
   </section>
 
   <!-- ✅ Login Section -->
   <section id="login-section" style="display:none;">
     <h2>Login</h2>
-    <input type="email" id="login-email" placeholder="Email" autocomplete="email"><br><br>
-    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password"><br><br>
+    <input type="email" id="login-email" placeholder="Email" autocomplete="email" /><br><br>
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" /><br><br>
     <button id="loginBtn">Login</button>
   </section>
 
   <!-- ✅ Signup Section -->
   <section id="signup-section" style="display:none;">
     <h2>Signup</h2>
-    <input type="text" id="signup-username" placeholder="Username" autocomplete="username"><br><br>
-    <input type="email" id="signup-email" placeholder="Email" autocomplete="email"><br><br>
-    <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password"><br><br>
+    <input type="text" id="signup-username" placeholder="Username" autocomplete="username" /><br><br>
+    <input type="email" id="signup-email" placeholder="Email" autocomplete="email" /><br><br>
+    <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password" /><br><br>
     <button id="signupBtn">Signup</button>
   </section>
 
@@ -132,7 +128,7 @@
     </div>
   </div>
 
-  <!-- ✅ JS Libraries -->
+  <!-- ✅ Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
   <script src="app1.js"></script>
 </body>

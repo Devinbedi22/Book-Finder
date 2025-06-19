@@ -68,6 +68,10 @@ document.getElementById('signupBtn').onclick = async () => {
     return showMessage('Fill all fields!', 'error');
   }
 
+  if (password.length < 6) {
+    return showMessage('Password must be at least 6 characters', 'error');
+  }
+
   try {
     const res = await fetch(`${BASE_URL}/api/users/register`, {
       method: 'POST',
@@ -80,7 +84,6 @@ document.getElementById('signupBtn').onclick = async () => {
       showMessage(data.message || 'Signup successful!');
       showSection('login');
     } else {
-      console.error(data);
       showMessage(data.message || 'Signup failed', 'error');
     }
   } catch (e) {
@@ -117,7 +120,6 @@ document.getElementById('loginBtn').onclick = async () => {
       showSection('home');
       fetchBooks();
     } else {
-      console.error(data);
       showMessage(data.message || 'Invalid credentials', 'error');
     }
   } catch (e) {
@@ -155,12 +157,11 @@ async function fetchBooks() {
       return;
     }
 
-    if (!res.ok) throw new Error('Error fetching books');
     const books = await res.json();
     const ul = document.getElementById('book-list');
     ul.innerHTML = '';
 
-    (books || []).forEach((b) => {
+    books.forEach((b) => {
       const authorName = Array.isArray(b.authors) && b.authors.length ? b.authors.join(', ') : 'Unknown author';
       const thumb = b.thumbnail || 'https://via.placeholder.com/128x195';
       const infoLink = b.infoLink || '#';
@@ -207,19 +208,9 @@ document.getElementById('book-list').addEventListener('click', async (e) => {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
-      if (res.status === 401) {
-        token = null;
-        localStorage.removeItem('token');
-        updateNavbar();
-        showMessage('Session expired. Please login again.', 'error');
-        showSection('login');
-        return;
-      }
-
       if (res.ok) {
-        showMessage('Book deleted');
+        showMessage('Book deleted', 'success');
         fetchBooks();
       } else {
         showMessage(data.message || 'Delete failed', 'error');
@@ -280,7 +271,11 @@ document.getElementById('search-button').onclick = async () => {
             body: JSON.stringify({ title, authors, description, thumbnail, infoLink }),
           });
           const saved = await res.json();
-          showMessage(res.ok ? 'Book saved!' : saved.message || 'Error saving', res.ok ? 'success' : 'error');
+          if (res.ok) {
+            showMessage('Book added to your list!', 'success');
+          } else {
+            showMessage(saved.message || 'Error saving book', 'error');
+          }
         } catch (err) {
           console.error(err);
           showMessage('Error saving book', 'error');
@@ -334,8 +329,7 @@ async function loadTrending() {
     });
   } catch (e) {
     console.error('Trending load error', e);
-    const list = document.getElementById('carousel-list');
-    list.innerHTML = '<p>Could not load trending books.</p>';
+    document.getElementById('carousel-list').innerHTML = '<p>Could not load trending books.</p>';
   }
 }
 
