@@ -18,6 +18,10 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // ===== SESSION MIDDLEWARE =====
+const isProduction = process.env.NODE_ENV === 'production';
+
+app.set('trust proxy', 1); // ✅ VERY IMPORTANT on Render
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'yoursecret',
   resave: false,
@@ -25,11 +29,13 @@ app.use(session({
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
   cookie: {
     httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24,
-    secure: true,
-    sameSite: 'none'
+    secure: isProduction,        // ✅ Secure only in production
+    sameSite: isProduction ? 'none' : 'lax',  // ✅ Cross-site only in prod
+    maxAge: 1000 * 60 * 60 * 24
   }
 }));
+
+
 
 // ✅ Add this BEFORE CORS
 app.use((req, res, next) => {
@@ -38,7 +44,6 @@ app.use((req, res, next) => {
 });
 // ===== CORS + BODY PARSING =====
 app.use(cors({
-  origin: 'https://book-finder-xmxo.onrender.com',
   credentials: true,
 }));
 app.use(express.json());

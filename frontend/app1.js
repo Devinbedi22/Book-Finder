@@ -1,4 +1,4 @@
-const BASE_URL = 'https://book-finder-xmxo.onrender.com';
+const BASE_URL = '';
 
 function showMessage(msg, type = 'success') {
   let messageBar = document.getElementById('message-bar');
