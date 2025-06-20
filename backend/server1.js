@@ -1,17 +1,13 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const axios = require('axios');
-const jwt = require('jsonwebtoken');
 const path = require('path');
 
 const app = express();
-
-// ===== MIDDLEWARE =====
-app.use(cors());
-app.use(express.json());
-app.use(express.static('public'));
 
 // ===== MONGODB CONNECTION =====
 mongoose.connect(process.env.MONGO_URI, {
@@ -21,36 +17,51 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
+// ===== SESSION MIDDLEWARE =====
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'yoursecret',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie: {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+    secure: process.env.NODE_ENV === 'production', // true on HTTPS production
+    sameSite: 'lax'
+  }
+}));
+
+// ===== CORS + BODY PARSING =====
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+app.use(express.json());
+
 // ===== MODELS & ROUTES =====
 const Book = require('./book');
 const authRoutes = require('./auth');
 app.use('/api/users', authRoutes);
 
-// ===== AUTH MIDDLEWARE =====
-const auth = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId;
-    next();
-  } catch {
-    res.status(401).json({ message: 'Invalid or expired token' });
+// ===== SESSION-BASED AUTH MIDDLEWARE =====
+const requireLogin = (req, res, next) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
   }
+  next();
 };
 
 // ===== BOOK ROUTES =====
 
 // Add a book
-app.post('/api/books', auth, async (req, res) => {
+app.post('/api/books', requireLogin, async (req, res) => {
   const { title, authors } = req.body;
   if (!title || !Array.isArray(authors) || authors.length === 0) {
     return res.status(400).json({ message: 'Title and at least one author are required' });
   }
 
   try {
-    const book = new Book({ ...req.body, user: req.userId });
+    const book = new Book({ ...req.body, user: req.session.userId });
     const saved = await book.save();
     res.status(201).json(saved);
   } catch (e) {
@@ -60,8 +71,8 @@ app.post('/api/books', auth, async (req, res) => {
 });
 
 // Get user's books (with optional author filter)
-app.get('/api/books', auth, async (req, res) => {
-  const filter = { user: req.userId };
+app.get('/api/books', requireLogin, async (req, res) => {
+  const filter = { user: req.session.userId };
   if (req.query.author) {
     filter['authors.0'] = new RegExp(req.query.author, 'i');
   }
@@ -76,9 +87,9 @@ app.get('/api/books', auth, async (req, res) => {
 });
 
 // Delete a book
-app.delete('/api/books/:id', auth, async (req, res) => {
+app.delete('/api/books/:id', requireLogin, async (req, res) => {
   try {
-    const deleted = await Book.findOneAndDelete({ _id: req.params.id, user: req.userId });
+    const deleted = await Book.findOneAndDelete({ _id: req.params.id, user: req.session.userId });
     if (!deleted) {
       return res.status(404).json({ message: 'Book not found or not owned by user' });
     }

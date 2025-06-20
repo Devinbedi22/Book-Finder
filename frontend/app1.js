@@ -1,5 +1,4 @@
 const BASE_URL = 'https://book-finder-xmxo.onrender.com';
-let token = localStorage.getItem('token');
 
 function showMessage(msg, type = 'success') {
   let messageBar = document.getElementById('message-bar');
@@ -50,9 +49,9 @@ function showSection(sectionKey) {
 Object.entries(navMap).forEach(([navId, sec]) => {
   const btn = document.getElementById(navId);
   if (btn) {
-    btn.onclick = () => {
+    btn.onclick = async () => {
       const needsLogin = sec === 'list' || sec === 'search';
-      if (needsLogin && !token) {
+      if (needsLogin && !(await isLoggedIn())) {
         showMessage('Please login first!', 'error');
         return;
       }
@@ -67,25 +66,22 @@ document.getElementById('signupBtn').onclick = async () => {
   const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value;
 
-  if (!username || !email || !password) {
-    return showMessage('Fill all fields!', 'error');
-  }
-
-  if (password.length < 6) {
-    return showMessage('Password must be at least 6 characters', 'error');
-  }
+  if (!username || !email || !password) return showMessage('Fill all fields!', 'error');
+  if (password.length < 6) return showMessage('Password must be at least 6 characters', 'error');
 
   try {
     const res = await fetch(`${BASE_URL}/api/users/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ username, email, password }),
     });
 
     const data = await res.json();
     if (res.ok) {
       showMessage(data.message || 'Signup successful!');
-      showSection('login');
+      updateNavbar();
+      showSection('home');
     } else {
       showMessage(data.message || 'Signup failed', 'error');
     }
@@ -103,21 +99,18 @@ document.getElementById('loginBtn').onclick = async () => {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
 
-  if (!email || !password) {
-    return showMessage('Enter email & password!', 'error');
-  }
+  if (!email || !password) return showMessage('Enter email & password!', 'error');
 
   try {
     const res = await fetch(`${BASE_URL}/api/users/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
     if (res.ok) {
-      token = data.token;
-      localStorage.setItem('token', token);
       showMessage('Logged in successfully!');
       updateNavbar();
       showSection('home');
@@ -135,25 +128,28 @@ document.getElementById('login-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('loginBtn').click();
 });
 
-document.getElementById('logoutBtn').onclick = () => {
-  token = null;
-  localStorage.removeItem('token');
-  updateNavbar();
-  showMessage('Logged out!');
-  showSection('login');
+document.getElementById('logoutBtn').onclick = async () => {
+  try {
+    await fetch(`${BASE_URL}/api/users/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    updateNavbar();
+    showMessage('Logged out!');
+    showSection('login');
+  } catch (e) {
+    console.error(e);
+    showMessage('Logout failed', 'error');
+  }
 };
 
 async function fetchBooks() {
-  if (!token) return;
-
   try {
     const res = await fetch(`${BASE_URL}/api/books`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     });
 
     if (res.status === 401) {
-      token = null;
-      localStorage.removeItem('token');
       updateNavbar();
       showMessage('Session expired. Please login again.', 'error');
       showSection('login');
@@ -195,7 +191,6 @@ async function fetchBooks() {
 document.getElementById('book-list').addEventListener('click', async (e) => {
   const btn = e.target.closest('button');
   if (!btn) return;
-
   const id = btn.dataset.id;
 
   if (btn.classList.contains('modern-delete-btn')) {
@@ -208,7 +203,7 @@ document.getElementById('book-list').addEventListener('click', async (e) => {
     try {
       const res = await fetch(`${BASE_URL}/api/books/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       const data = await res.json();
       if (res.ok) {
@@ -262,14 +257,13 @@ document.getElementById('search-button').onclick = async () => {
         </div>`;
 
       card.querySelector('.save-btn').onclick = async () => {
-        if (!token) return showMessage('Please login to save books', 'error');
         try {
           const res = await fetch(`${BASE_URL}/api/books`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
             },
+            credentials: 'include',
             body: JSON.stringify({ title, authors, description, thumbnail, infoLink }),
           });
           const saved = await res.json();
@@ -335,16 +329,32 @@ async function loadTrending() {
   }
 }
 
-function updateNavbar() {
-  const isLoggedIn = !!localStorage.getItem('token');
-  document.getElementById('nav-login').style.display = isLoggedIn ? 'none' : 'inline-block';
-  document.getElementById('nav-signup').style.display = isLoggedIn ? 'none' : 'inline-block';
-  document.getElementById('logoutBtn').style.display = isLoggedIn ? 'inline-block' : 'none';
+async function isLoggedIn() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/users/me`, {
+      credentials: 'include',
+    });
+    const data = await res.json();
+    return !!data.user;
+  } catch {
+    return false;
+  }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+async function updateNavbar() {
+  const isLogged = await isLoggedIn();
+  document.getElementById('nav-login').style.display = isLogged ? 'none' : 'inline-block';
+  document.getElementById('nav-signup').style.display = isLogged ? 'none' : 'inline-block';
+  document.getElementById('logoutBtn').style.display = isLogged ? 'inline-block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
   initCarousel();
-  updateNavbar();
-  if (token) fetchBooks();
-  showSection(token ? 'home' : 'login');
+  await updateNavbar();
+  if (await isLoggedIn()) {
+    fetchBooks();
+    showSection('home');
+  } else {
+    showSection('login');
+  }
 });

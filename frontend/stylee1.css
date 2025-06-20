@@ -31,7 +31,14 @@ input, select {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
- 
+
+input:focus,
+select:focus,
+button:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
 .main-nav {
   background: #f0e9e1;
   display: flex;
@@ -82,7 +89,6 @@ input, select {
   padding: 10px;
 }
 
- 
 @media (max-width: 768px) {
   .nav-menu {
     display: none;
@@ -99,7 +105,6 @@ input, select {
   }
 }
 
- 
 section {
   display: none;
   padding: 20px;
@@ -108,23 +113,43 @@ section {
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
- 
+
+section[style*="block"] {
+  opacity: 1;
+}
+
 #message-bar {
   position: fixed;
   top: 10px;
   left: 50%;
-  transform: translateX(-50%);
-  background-color: #f8d7da;
-  color: #721c24;
+  transform: translateX(-50%) translateY(0);
   padding: 10px 20px;
-  border: 1px solid #f5c6cb;
   border-radius: 6px;
   z-index: 1000;
-  display: none;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
- 
+#message-bar.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+#message-bar.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+#message-bar.show {
+  opacity: 1 !important;
+}
+
 .fa-ul {
   padding-left: 2em;
 }
@@ -151,7 +176,6 @@ ul.fa-ul li {
   line-height: 1.3;
 }
 
- 
 .search-box {
   margin: 10px 0;
   display: flex;
@@ -159,7 +183,7 @@ ul.fa-ul li {
   gap: 10px;
   align-items: center;
 }
- 
+
 #search-results {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -175,7 +199,6 @@ ul.fa-ul li {
   margin-bottom: 10px;
 }
 
- 
 .book-card {
   display: flex;
   flex-direction: row;
@@ -230,7 +253,7 @@ ul.fa-ul li {
 .save-btn:hover {
   background-color: #2980b9;
 }
- 
+
 .book-card-inline {
   display: flex;
   align-items: center;
@@ -243,7 +266,7 @@ ul.fa-ul li {
   height: auto;
   border-radius: 4px;
 }
- 
+
 .modern-delete-btn {
   background-color: #d32f2f;
   color: white;
@@ -286,7 +309,7 @@ ul.fa-ul li {
   background-color: #ccc;
   color: black;
 }
- 
+
 .splide__slide .book-card {
   margin: auto;
 }
@@ -304,11 +327,15 @@ ul.fa-ul li {
   text-decoration: underline;
   color: #007bff;
 }
-#message-bar {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  transform: translateX(-50%) translateY(0);
-}
 
-#message-bar.show {
-  opacity: 1 !important;
+@media (max-width: 600px) {
+  .book-card-inline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .book-thumb-small {
+    width: 100%;
+    max-width: 80px;
+  }
 }

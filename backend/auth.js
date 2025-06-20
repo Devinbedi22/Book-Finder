@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 // ===== User Schema =====
@@ -47,9 +46,14 @@ router.post('/register', async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    await new User({ username: username.trim(), email: email.toLowerCase().trim(), password: hashed }).save();
+    const newUser = await new User({
+      username: username.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashed
+    }).save();
 
-    res.status(201).json({ message: 'User created successfully' });
+    req.session.userId = newUser._id;  // Create session after registration
+    res.status(201).json({ message: 'User registered and logged in' });
   } catch (err) {
     console.error('Signup error:', err.message);
     res.status(500).json({ message: 'Server error during registration' });
@@ -66,11 +70,36 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token });
+    req.session.userId = user._id;  // Set session
+    res.json({ message: 'Logged in successfully' });
   } catch (err) {
     console.error('Login error:', err.message);
     res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// ===== Logout Route =====
+router.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Logout error:', err.message);
+      return res.status(500).json({ message: 'Error logging out' });
+    }
+    res.clearCookie('connect.sid');
+    res.json({ message: 'Logged out successfully' });
+  });
+});
+
+// ===== Get Current User =====
+router.get('/me', async (req, res) => {
+  try {
+    if (!req.session.userId) return res.status(401).json({ user: null });
+
+    const user = await User.findById(req.session.userId).select('-password');
+    res.json({ user });
+  } catch (err) {
+    console.error('Error getting user:', err.message);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
