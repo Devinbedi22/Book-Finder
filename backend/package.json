@@ -21,7 +21,9 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.15.1"
+    "mongoose": "^8.15.1",
+    "express-session": "^1.17.3",
+    "connect-mongo": "^4.6.0"
     
   }
 }
