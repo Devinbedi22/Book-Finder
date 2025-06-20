@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 });
 // ===== CORS + BODY PARSING =====
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: 'https://book-finder-xmxo.onrender.com',
   credentials: true,
 }));
 app.use(express.json());
