@@ -25,15 +25,20 @@ app.use(session({
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
   cookie: {
     httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-    secure: process.env.NODE_ENV === 'production', // true on HTTPS production
-    sameSite: 'lax'
+    maxAge: 1000 * 60 * 60 * 24,
+    secure: true,
+    sameSite: 'none'
   }
 }));
 
+// ✅ Add this BEFORE CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 // ===== CORS + BODY PARSING =====
 app.use(cors({
-  origin: true,
+  origin: process.env.FRONTEND_URL,
   credentials: true,
 }));
 app.use(express.json());
