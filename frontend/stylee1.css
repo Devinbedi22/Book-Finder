@@ -339,3 +339,24 @@ ul.fa-ul li {
     max-width: 80px;
   }
 }
+
+@media (max-width: 768px) {
+  .splide__arrow {
+    top: 40% !important;   /* vertically center the arrows */
+    transform: translateY(-50%);
+    z-index: 10;
+  }
+
+  .splide__arrow--prev {
+    left: -10px !important;
+  }
+
+  .splide__arrow--next {
+    right: -10px !important;
+  }
+
+  .splide {
+    overflow: hidden;
+    position: relative;
+  }
+}
