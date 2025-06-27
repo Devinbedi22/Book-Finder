@@ -356,6 +356,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     fetchBooks();
     showSection('home');
   } else {
-    showSection('login');
+    showSection('signup');
   }
 });
