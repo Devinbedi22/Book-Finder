@@ -285,7 +285,8 @@ document.getElementById('search-button').onclick = async () => {
   }
 };
 
-function initCarousel() {
+async function initCarousel() {
+  await loadTrending();
   new Splide('#book-carousel', {
     perPage: 4,
     gap: '1rem',
@@ -298,7 +299,7 @@ function initCarousel() {
       1024: { perPage: 2 },
     },
   }).mount();
-  loadTrending();
+  
 }
 
 async function loadTrending() {
