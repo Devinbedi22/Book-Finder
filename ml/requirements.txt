@@ -1,0 +1,17 @@
+cassandra-driver
+tiktoken 
+sentence_transformers
+langchain
+langchain_community
+langchain_groq
+langchain_core 
+tiktoken
+cassio
+flask
+flask_cors 
+serpapi
+google-search-results  
+duckduckgo-search 
+pandas
+numpy
+rapidfuzz
